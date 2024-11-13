@@ -10,11 +10,14 @@ dotenv_1.default.config();
 // Create server
 const app = (0, express_1.default)();
 // Middleware
-app.use((0, cors_1.default)({ origin: "http://localhost:4321", credentials: true }));
+app.use((0, cors_1.default)({ origin: "http://localhost:5173/", credentials: true }));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
 // Routes
-// TODO
+const user_routes_1 = __importDefault(require("./routes/user.routes"));
+app.use("/api/users", user_routes_1.default);
+const restaurant_routes_1 = __importDefault(require("./routes/restaurant.routes"));
+app.use("/api/restaurants", restaurant_routes_1.default);
 // 404 Fallback
 app.use((_, res) => {
     res.status(404).send("Invalid route");

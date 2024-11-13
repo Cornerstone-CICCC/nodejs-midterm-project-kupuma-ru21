@@ -1,19 +1,23 @@
 import express, { Response } from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 // Create server
 const app = express();
 
 // Middleware
-app.use(cors({ origin: "http://localhost:4321", credentials: true }));
+app.use(cors({ origin: "http://localhost:5173/", credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Routes
-// TODO
+import userRouter from "./routes/user.routes";
+app.use("/api/users", userRouter);
+
+import restaurantRouter from "./routes/restaurant.routes";
+app.use("/api/restaurants", restaurantRouter);
 
 // 404 Fallback
 app.use((_, res: Response) => {
