@@ -14,7 +14,6 @@ class UserModel {
   }
 
   findByEmail(email: string): User | null {
-    console.log("this.users", this.users);
     return this.users.find((user) => user.email === email) ?? null;
   }
 }

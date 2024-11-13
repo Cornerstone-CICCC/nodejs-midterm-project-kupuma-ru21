@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import userModel from "../models/user.model";
 import { User } from "../types/user";
 import { compareHash, hashed } from "../utils/hash.util";
+import crypto from "crypto";
+import { HMAC_SHA256 } from "../utils/jwt";
 
 const addUser = async (
   req: Request<{}, {}, Pick<User, "email" | "password">>,
@@ -20,12 +22,19 @@ const loginUser = async (
   req: Request<{}, {}, Pick<User, "email" | "password">>,
   res: Response
 ) => {
+  const jwtSecret = process.env.JWT_SECRET ?? "";
+  if (jwtSecret === "") {
+    res.status(404).send({ token: "", error: "jwtSecret not found" });
+    return;
+  }
+
   const { email, password } = req.body;
   const user = userModel.findByEmail(email);
   if (!user) {
     res.status(404).send({ token: "", error: "User not found" });
     return;
   }
+
   const isMatch = await compareHash(password, user.password);
   if (!isMatch) {
     res.status(401).send({ token: "", error: "Invalid credentials" });
@@ -43,9 +52,10 @@ const loginUser = async (
     const jsonB64NoPadding = jsonB64.replace(/={1,2}$/, "");
     return jsonB64NoPadding;
   };
-  // TODO: Implement the encodeHMAC function
   const unsignedToken = `${encodeBase64(header)}.${encodeBase64(payload)}`;
-  res.status(200).send({ token: "token", error: "" });
+
+  const signature = HMAC_SHA256(jwtSecret, unsignedToken);
+  res.status(200).send({ token: `${unsignedToken}.${signature}`, error: "" });
 };
 
 export default { addUser, loginUser };

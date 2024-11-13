@@ -10,7 +10,6 @@ class RestaurantModel {
       ...newRestaurant,
     };
     this.restaurants.push(restaurant);
-    console.log("Restaurant added:", restaurant);
     return restaurant;
   }
 

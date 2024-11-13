@@ -24,12 +24,20 @@ export default function Index() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const body = await request.formData();
+  const cookieHeader = request.headers.get("Cookie");
+
+  const [cookie, body] = await Promise.all([
+    tokenCookie.parse(cookieHeader),
+    request.formData(),
+  ]);
 
   try {
     const result = await fetch("http://localhost:8080/api/restaurants/add", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookie || {}}`,
+      },
       body: JSON.stringify({ name: body.get("name") }),
     });
     const res: { error: string } = await result.json();
