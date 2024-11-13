@@ -14,7 +14,7 @@ export default function Index() {
   return (
     <Box p="24px">
       <Text as="h1" fontWeight={700} fontSize="32px" mb="24px">
-        Add Restaurant
+        Edit Restaurant
       </Text>
       <Form method="POST">
         <VStack gap="10" width="full" mb="24px">
@@ -37,7 +37,10 @@ export default function Index() {
   );
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, params }: ActionFunctionArgs) {
+  const id = params.id || "";
+  if (!id) throw new Error("Id not found");
+
   const cookieHeader = request.headers.get("Cookie");
 
   const [cookie, body] = await Promise.all([
@@ -46,22 +49,19 @@ export async function action({ request }: ActionFunctionArgs) {
   ]);
 
   try {
-    const result = await fetch("http://localhost:8080/api/restaurants/add", {
+    await fetch("http://localhost:8080/api/restaurants/edit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${cookie || {}}`,
       },
       body: JSON.stringify({
+        id,
         name: body.get("name"),
         detail: body.get("detail"),
         price: body.get("price"),
       }),
     });
-    const res: { error: string } = await result.json();
-    const { error } = res;
-
-    if (error) throw new Error(error);
 
     return redirect("/");
   } catch (error) {

@@ -1,9 +1,13 @@
 import { Box, Button, Card, Flex, HStack, Image, Text } from "@chakra-ui/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, Link, redirect } from "@remix-run/react";
-import { tokenCookie } from "~/cookies.server";
+import { Form, Link, redirect, useLoaderData } from "@remix-run/react";
+import { tokenCookie } from "../cookies.server";
+import { json } from "@remix-run/node";
 
 export default function Index() {
+  const data = useLoaderData<typeof loader>();
+  if (!data) return <>data not found</>;
+
   return (
     <Box p="24px">
       <Text as="h1" fontWeight={700} fontSize="32px" mb="24px">
@@ -18,31 +22,34 @@ export default function Index() {
         </Form>
       </Flex>
       <HStack>
-        <Card.Root maxW="sm" overflow="hidden">
-          <Image
-            src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-            alt="Green double couch with wooden legs"
-          />
-          <Card.Body gap="2">
-            <Card.Title>Living room Sofa</Card.Title>
-            <Card.Description>
-              This sofa is perfect for modern tropical spaces, baroque inspired
-              spaces.
-            </Card.Description>
-            <Text
-              textStyle="2xl"
-              fontWeight="medium"
-              letterSpacing="tight"
-              mt="2"
-            >
-              $450
-            </Text>
-          </Card.Body>
-          <Card.Footer gap="2">
-            <Button variant="solid">Buy now</Button>
-            <Button variant="ghost">Add to cart</Button>
-          </Card.Footer>
-        </Card.Root>
+        {data.restaurants.map(({ id, name, detail, price }) => {
+          return (
+            <Card.Root maxW="sm" overflow="hidden" key={id}>
+              <Image
+                src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
+                alt="Green double couch with wooden legs"
+              />
+              <Card.Body gap="2">
+                <Card.Title>{name}</Card.Title>
+                <Card.Description>{detail}</Card.Description>
+                <Text
+                  textStyle="2xl"
+                  fontWeight="medium"
+                  letterSpacing="tight"
+                  mt="2"
+                >
+                  ${price}
+                </Text>
+              </Card.Body>
+              <Card.Footer gap="2">
+                <Button variant="solid">
+                  <Link to={id}>Edit</Link>
+                </Button>
+                <Button variant="ghost">Add to cart</Button>
+              </Card.Footer>
+            </Card.Root>
+          );
+        })}
       </HStack>
     </Box>
   );
@@ -58,7 +65,31 @@ export async function action() {
 export async function loader({ request }: LoaderFunctionArgs) {
   const token = await tokenCookie.parse(request.headers.get("Cookie"));
   if (!token) return redirect("/login");
-  return null;
+
+  try {
+    const result = await fetch("http://localhost:8080/api/restaurants", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const {
+      restaurants,
+    }: {
+      restaurants: {
+        id: string;
+        name: string;
+        detail: string;
+        price: number;
+      }[];
+    } = await result.json();
+
+    return json({ restaurants });
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
 
 export const meta: MetaFunction = () => {

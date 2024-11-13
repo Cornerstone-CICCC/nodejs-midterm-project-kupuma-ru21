@@ -16,6 +16,14 @@ class RestaurantModel {
   getRestaurants(): Restaurant[] {
     return this.restaurants;
   }
+
+  editRestaurant(restaurantEdited: Restaurant): void {
+    const restaurants = this.restaurants.map((restaurant) => {
+      if (restaurant.id === restaurantEdited.id) return { ...restaurantEdited };
+      return restaurant;
+    });
+    this.restaurants = restaurants;
+  }
 }
 
 export default new RestaurantModel();

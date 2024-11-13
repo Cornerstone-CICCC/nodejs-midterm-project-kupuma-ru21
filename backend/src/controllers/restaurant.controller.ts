@@ -3,16 +3,23 @@ import restaurantModel from "../models/restaurant.model";
 import { Restaurant } from "../types/restaurant";
 
 const addRestaurant = async (
-  req: Request<{}, {}, Pick<Restaurant, "name">>,
+  req: Request<{}, {}, Omit<Restaurant, "id">>,
   res: Response
 ) => {
-  const { name } = req.body;
-  const restaurant = restaurantModel.createRestaurant({ name });
+  const restaurant = restaurantModel.createRestaurant(req.body);
   res.json(restaurant);
 };
 
 const getRestaurants = async (_: Request, res: Response) => {
-  res.json(restaurantModel.getRestaurants());
+  res.json({ restaurants: restaurantModel.getRestaurants() });
 };
 
-export default { addRestaurant, getRestaurants };
+const editRestaurant = async (
+  req: Request<{}, {}, Restaurant>,
+  res: Response
+) => {
+  restaurantModel.editRestaurant(req.body);
+  res.json({ message: "Restaurant edited" });
+};
+
+export default { addRestaurant, getRestaurants, editRestaurant };
