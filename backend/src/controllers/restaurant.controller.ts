@@ -22,4 +22,17 @@ const editRestaurant = async (
   res.json({ message: "Restaurant edited" });
 };
 
-export default { addRestaurant, getRestaurants, editRestaurant };
+const deleteRestaurant = async (
+  req: Request<{}, {}, Pick<Restaurant, "id">>,
+  res: Response
+) => {
+  restaurantModel.deleteRestaurant(req.body.id);
+  res.json({ message: "Restaurant deleted" });
+};
+
+export default {
+  addRestaurant,
+  getRestaurants,
+  editRestaurant,
+  deleteRestaurant,
+};

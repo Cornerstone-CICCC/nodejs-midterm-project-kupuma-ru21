@@ -24,6 +24,12 @@ class RestaurantModel {
     });
     this.restaurants = restaurants;
   }
+
+  deleteRestaurant(id: string): void {
+    this.restaurants = this.restaurants.filter((restaurant) => {
+      return restaurant.id !== id;
+    });
+  }
 }
 
 export default new RestaurantModel();

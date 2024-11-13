@@ -39,5 +39,6 @@ restaurantRouter.use((req, res, next) => {
 restaurantRouter.post("/add", restaurantController.addRestaurant);
 restaurantRouter.post("/", restaurantController.getRestaurants);
 restaurantRouter.post("/edit", restaurantController.editRestaurant);
+restaurantRouter.post("/delete", restaurantController.deleteRestaurant);
 
 export default restaurantRouter;

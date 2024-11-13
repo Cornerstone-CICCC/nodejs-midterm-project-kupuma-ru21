@@ -1,11 +1,23 @@
 import { Box, Button, Card, Flex, HStack, Image, Text } from "@chakra-ui/react";
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, Link, redirect, useLoaderData } from "@remix-run/react";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
+import {
+  Form,
+  Link,
+  redirect,
+  useFetcher,
+  useLoaderData,
+} from "@remix-run/react";
 import { tokenCookie } from "../cookies.server";
 import { json } from "@remix-run/node";
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
+  const fetcher = useFetcher();
+
   if (!data) return <>data not found</>;
 
   return (
@@ -17,7 +29,7 @@ export default function Index() {
         <Button>
           <Link to="/add-restaurant">Add Restaurant</Link>
         </Button>
-        <Form method="POST">
+        <Form method="POST" action="logout">
           <Button type="submit">Logout</Button>
         </Form>
       </Flex>
@@ -45,7 +57,12 @@ export default function Index() {
                 <Button variant="solid">
                   <Link to={id}>Edit</Link>
                 </Button>
-                <Button variant="ghost">Add to cart</Button>
+                <fetcher.Form method="POST">
+                  <Button type="submit" variant="ghost">
+                    Delete
+                  </Button>
+                  <input type="hidden" name="id" value={id} />
+                </fetcher.Form>
               </Card.Footer>
             </Card.Root>
           );
@@ -55,11 +72,29 @@ export default function Index() {
   );
 }
 
-export async function action() {
-  return redirect("/login", {
-    // REF: https://sergiodxa.com/tutorials/delete-a-cookie-using-remix-cookie-helpers
-    headers: { "Set-Cookie": await tokenCookie.serialize("", { maxAge: 1 }) },
-  });
+export async function action({ request }: ActionFunctionArgs) {
+  const cookieHeader = request.headers.get("Cookie");
+
+  const [cookie, body] = await Promise.all([
+    tokenCookie.parse(cookieHeader),
+    request.formData(),
+  ]);
+
+  try {
+    await fetch("http://localhost:8080/api/restaurants/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${cookie}`,
+      },
+      body: JSON.stringify({ id: body.get("id") }),
+    });
+
+    return redirect("/");
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
