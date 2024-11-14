@@ -13,6 +13,8 @@ const app = (0, express_1.default)();
 app.use((0, cors_1.default)({ origin: "http://localhost:5173/", credentials: true }));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use(express_1.default.json());
+// NOTE: https://expressjs.com/en/starter/static-files.html
+app.use(express_1.default.static("public"));
 // Routes
 const user_routes_1 = __importDefault(require("./routes/user.routes"));
 app.use("/api/users", user_routes_1.default);
@@ -23,6 +25,6 @@ app.use((_, res) => {
     res.status(404).send("Invalid route");
 });
 // Start server
-app.listen(8080, () => {
-    console.log("Server is running on http://localhost:8080/...");
+app.listen(1000, () => {
+    console.log("Server is running on http://localhost:1000/...");
 });

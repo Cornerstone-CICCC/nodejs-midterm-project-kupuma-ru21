@@ -13,6 +13,7 @@ import {
 } from "@remix-run/react";
 import { tokenCookie } from "../cookies.server";
 import { json } from "@remix-run/node";
+import { Restaurant } from "~/types/restaurant";
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
@@ -34,48 +35,47 @@ export default function Index() {
         </Form>
       </Flex>
       <HStack>
-        {data.restaurants.map(({ id, name, detail, price, address }) => {
-          return (
-            <Card.Root maxW="sm" overflow="hidden" key={id}>
-              <Image
-                src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-                alt="Green double couch with wooden legs"
-              />
-              <Card.Body gap="2">
-                <Card.Title>{name}</Card.Title>
-                <Card.Description>{detail}</Card.Description>
-                <Text
-                  textStyle="2xl"
-                  fontWeight="medium"
-                  letterSpacing="tight"
-                  mt="2"
-                >
-                  ${price}
-                </Text>
-                <Text fontWeight="medium" letterSpacing="tight" mt="2">
-                  <a
-                    href={`https://www.google.co.jp/maps/place/${address}`}
-                    target="__blank"
-                    rel="noopener noreferrer"
+        {data.restaurants?.map(
+          ({ id, name, detail, price, address, image }) => {
+            return (
+              <Card.Root maxW="sm" overflow="hidden" key={id}>
+                <Image src={image} alt="Green double couch with wooden legs" />
+                <Card.Body gap="2">
+                  <Card.Title>{name}</Card.Title>
+                  <Card.Description>{detail}</Card.Description>
+                  <Text
+                    textStyle="2xl"
+                    fontWeight="medium"
+                    letterSpacing="tight"
+                    mt="2"
                   >
-                    {address}
-                  </a>
-                </Text>
-              </Card.Body>
-              <Card.Footer gap="2">
-                <Button variant="solid">
-                  <Link to={id}>Edit</Link>
-                </Button>
-                <fetcher.Form method="POST">
-                  <Button type="submit" variant="ghost">
-                    Delete
+                    ${price}
+                  </Text>
+                  <Text fontWeight="medium" letterSpacing="tight" mt="2">
+                    <a
+                      href={`https://www.google.co.jp/maps/place/${address}`}
+                      target="__blank"
+                      rel="noopener noreferrer"
+                    >
+                      {address}
+                    </a>
+                  </Text>
+                </Card.Body>
+                <Card.Footer gap="2">
+                  <Button variant="solid">
+                    <Link to={id}>Edit</Link>
                   </Button>
-                  <input type="hidden" name="id" value={id} />
-                </fetcher.Form>
-              </Card.Footer>
-            </Card.Root>
-          );
-        })}
+                  <fetcher.Form method="POST">
+                    <Button type="submit" variant="ghost">
+                      Delete
+                    </Button>
+                    <input type="hidden" name="id" value={id} />
+                  </fetcher.Form>
+                </Card.Footer>
+              </Card.Root>
+            );
+          }
+        )}
       </HStack>
     </Box>
   );
@@ -90,7 +90,7 @@ export async function action({ request }: ActionFunctionArgs) {
   ]);
 
   try {
-    await fetch("http://localhost:8080/api/restaurants/delete", {
+    await fetch("http://localhost:1000/api/restaurants/delete", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -111,24 +111,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (!token) return redirect("/login");
 
   try {
-    const result = await fetch("http://localhost:8080/api/restaurants", {
-      method: "POST",
+    const result = await fetch("http://localhost:1000/api/restaurants", {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
-    const {
-      restaurants,
-    }: {
-      restaurants: {
-        id: string;
-        name: string;
-        detail: string;
-        price: number;
-        address: string;
-      }[];
-    } = await result.json();
+    const { restaurants }: { restaurants: Restaurant[] } = await result.json();
 
     return json({ restaurants });
   } catch (error) {

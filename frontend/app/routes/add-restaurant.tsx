@@ -34,6 +34,11 @@ export default function Index() {
             <Input required name="address" />
           </Field>
         </VStack>
+        <input
+          type="hidden"
+          name="image"
+          value="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
+        />
         <Button type="submit">Add</Button>
       </Form>
     </Box>
@@ -49,7 +54,7 @@ export async function action({ request }: ActionFunctionArgs) {
   ]);
 
   try {
-    const result = await fetch("http://localhost:8080/api/restaurants/add", {
+    const result = await fetch("http://localhost:1000/api/restaurants/add", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -60,6 +65,7 @@ export async function action({ request }: ActionFunctionArgs) {
         detail: body.get("detail"),
         price: body.get("price"),
         address: body.get("address"),
+        image: body.get("image"),
       }),
     });
     const res: { error: string } = await result.json();

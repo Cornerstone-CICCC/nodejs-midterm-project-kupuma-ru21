@@ -14,6 +14,18 @@ const getRestaurants = async (_: Request, res: Response) => {
   res.json({ restaurants: restaurantModel.getRestaurants() });
 };
 
+const getRestaurantById = async (
+  req: Request<{ id: string }, {}, {}>,
+  res: Response
+) => {
+  const restaurant = restaurantModel.getRestaurantById(req.params.id);
+  if (!restaurant) {
+    res.status(404).json({ error: "Restaurant not found" });
+    return;
+  }
+  res.json({ restaurant });
+};
+
 const editRestaurant = async (
   req: Request<{}, {}, Restaurant>,
   res: Response
@@ -33,6 +45,7 @@ const deleteRestaurant = async (
 export default {
   addRestaurant,
   getRestaurants,
+  getRestaurantById,
   editRestaurant,
   deleteRestaurant,
 };

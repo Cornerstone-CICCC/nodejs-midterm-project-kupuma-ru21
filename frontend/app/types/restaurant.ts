@@ -4,5 +4,5 @@ export type Restaurant = {
   detail: string;
   price: number;
   address: string;
-  image?: string;
+  image: string;
 };

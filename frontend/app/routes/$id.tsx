@@ -1,16 +1,21 @@
 import { Box, Button, Input, Text, Textarea, VStack } from "@chakra-ui/react";
 import { Field } from "../components/ui/field";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, redirect } from "@remix-run/react";
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { Form, redirect, useLoaderData } from "@remix-run/react";
+import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { tokenCookie } from "../cookies.server";
 import {
   NumberInputField,
   NumberInputLabel,
   NumberInputRoot,
 } from "../components/ui/number-input";
+import { Restaurant } from "~/types/restaurant";
 
 export default function Index() {
+  const data = useLoaderData<typeof loader>();
+  if (!data) return <>data not found </>;
+  const { restaurant } = data;
+
   return (
     <Box p="24px">
       <Text as="h1" fontWeight={700} fontSize="32px" mb="24px">
@@ -18,23 +23,31 @@ export default function Index() {
       </Text>
       <Form method="POST">
         <VStack gap="10" width="full" mb="24px">
-          <Field label="Name" required>
-            <Input required name="name" autoComplete="true" />
+          <Field label="Name">
+            <Input
+              name="name"
+              autoComplete="true"
+              defaultValue={restaurant.name}
+            />
           </Field>
-          <Field label="Detail" required>
-            <Textarea required name="detail" />
+          <Field label="Detail">
+            <Textarea name="detail" defaultValue={restaurant.detail} />
           </Field>
-          <Field label="Price" required>
-            <NumberInputRoot name="price">
+          <Field label="Price">
+            <NumberInputRoot
+              name="price"
+              defaultValue={String(restaurant.price)}
+            >
               <NumberInputLabel />
               <NumberInputField />
             </NumberInputRoot>
           </Field>
-          <Field label="Address" required>
-            <Input required name="address" />
+          <Field label="Address">
+            <Input name="address" defaultValue={restaurant.address} />
           </Field>
         </VStack>
-        <Button type="submit">Add</Button>
+        <input type="hidden" name="image" value={restaurant.image} />
+        <Button type="submit">Update</Button>
       </Form>
     </Box>
   );
@@ -52,7 +65,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   ]);
 
   try {
-    await fetch("http://localhost:8080/api/restaurants/edit", {
+    await fetch("http://localhost:1000/api/restaurants/edit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -64,6 +77,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         detail: body.get("detail"),
         price: body.get("price"),
         address: body.get("address"),
+        image: body.get("image"),
       }),
     });
 
@@ -74,10 +88,28 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  const id = params.id || "";
+  if (!id) throw new Error("Id not found");
+
   const token = await tokenCookie.parse(request.headers.get("Cookie"));
   if (!token) return redirect("/login");
-  return null;
+
+  try {
+    const result = await fetch(`http://localhost:1000/api/restaurants/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const { restaurant }: { restaurant: Restaurant } = await result.json();
+
+    return json({ restaurant });
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
 
 export const meta: MetaFunction = () => {

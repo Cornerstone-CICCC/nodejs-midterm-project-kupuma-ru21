@@ -37,7 +37,8 @@ restaurantRouter.use((req, res, next) => {
 });
 
 restaurantRouter.post("/add", restaurantController.addRestaurant);
-restaurantRouter.post("/", restaurantController.getRestaurants);
+restaurantRouter.get("/", restaurantController.getRestaurants);
+restaurantRouter.get("/:id", restaurantController.getRestaurantById);
 restaurantRouter.post("/edit", restaurantController.editRestaurant);
 restaurantRouter.post("/delete", restaurantController.deleteRestaurant);
 

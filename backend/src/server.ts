@@ -11,6 +11,8 @@ const app = express();
 app.use(cors({ origin: "http://localhost:5173/", credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+// NOTE: https://expressjs.com/en/starter/static-files.html
+app.use(express.static("public"));
 
 // Routes
 import userRouter from "./routes/user.routes";
@@ -25,6 +27,6 @@ app.use((_, res: Response) => {
 });
 
 // Start server
-app.listen(8080, () => {
-  console.log("Server is running on http://localhost:8080/...");
+app.listen(1000, () => {
+  console.log("Server is running on http://localhost:1000/...");
 });

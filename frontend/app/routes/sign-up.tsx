@@ -40,7 +40,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const body = await request.formData();
 
   try {
-    await fetch("http://localhost:8080/api/users", {
+    await fetch("http://localhost:1000/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
