@@ -5,6 +5,8 @@ class RestaurantModel {
   private restaurants: Restaurant[] = [];
 
   createRestaurant(newRestaurant: Omit<Restaurant, "id">): Restaurant {
+    console.log("newRestaurant", newRestaurant);
+
     const restaurant = {
       id: uuidv4(),
       ...newRestaurant,

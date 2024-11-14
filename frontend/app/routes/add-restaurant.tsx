@@ -30,6 +30,9 @@ export default function Index() {
               <NumberInputField />
             </NumberInputRoot>
           </Field>
+          <Field label="Address" required>
+            <Input required name="address" />
+          </Field>
         </VStack>
         <Button type="submit">Add</Button>
       </Form>
@@ -56,6 +59,7 @@ export async function action({ request }: ActionFunctionArgs) {
         name: body.get("name"),
         detail: body.get("detail"),
         price: body.get("price"),
+        address: body.get("address"),
       }),
     });
     const res: { error: string } = await result.json();

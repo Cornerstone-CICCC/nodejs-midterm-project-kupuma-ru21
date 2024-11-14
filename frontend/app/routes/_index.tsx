@@ -34,7 +34,7 @@ export default function Index() {
         </Form>
       </Flex>
       <HStack>
-        {data.restaurants.map(({ id, name, detail, price }) => {
+        {data.restaurants.map(({ id, name, detail, price, address }) => {
           return (
             <Card.Root maxW="sm" overflow="hidden" key={id}>
               <Image
@@ -51,6 +51,15 @@ export default function Index() {
                   mt="2"
                 >
                   ${price}
+                </Text>
+                <Text fontWeight="medium" letterSpacing="tight" mt="2">
+                  <a
+                    href={`https://www.google.co.jp/maps/place/${address}`}
+                    target="__blank"
+                    rel="noopener noreferrer"
+                  >
+                    {address}
+                  </a>
                 </Text>
               </Card.Body>
               <Card.Footer gap="2">
@@ -117,6 +126,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         name: string;
         detail: string;
         price: number;
+        address: string;
       }[];
     } = await result.json();
 
