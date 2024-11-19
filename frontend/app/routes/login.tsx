@@ -28,7 +28,6 @@ export default function Index() {
                 required
                 name="password"
                 autoComplete="true"
-                minLength={8}
               />
             </Field>
           </HStack>
